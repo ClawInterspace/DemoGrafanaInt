@@ -1,0 +1,52 @@
+# Use postgres/example user/password credentials
+version: '3.1'
+
+services:
+
+  db:
+    image: postgres:latest
+    container_name: money_postgreDB
+    restart: always
+    env_file:
+      - postgre.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+
+  adminer:
+    image: adminer
+    container_name: money_postgre_adminer
+    restart: always
+    ports:
+      - "8080:8080"
+
+  influxdb:
+    image: influxdb:latest
+    container_name: money_influxdb
+    ports:
+      - "8083:8083"
+      - "8086:8086"
+      - "8090:8090"
+  #  env_file:
+  #    - 'env.influxdb'
+    volumes:
+      # Data persistency
+      # sudo mkdir -p /srv/docker/influxdb/data
+      - ./influxdb_data:/var/lib/influxdb
+
+  grafana:
+    image: grafana/grafana:5.0.0
+    container_name: money_grafana
+    ports:
+      - "3000:3000"
+  #  env_file:
+  #    - 'env.grafana'
+    links:
+      - influxdb
+    volumes:
+      # Data persistency
+      # sudo mkdir -p /srv/docker/grafana/data; chown 472:472 /srv/docker/grafana/data
+      - ./grafana_data:/var/lib/grafana
+      - ./grafana_log:/var/log/grafana
+        # user: "104"
